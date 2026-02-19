@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -37,6 +36,8 @@ interface ProductDetailProps {
   product: Product;
 }
 
+const PRELAUNCH_MODE = true;
+
 const pairingOptions = [
   { name: "Coffee", icon: Coffee, description: "Perfect morning companion" },
   { name: "Yogurt", icon: Utensils, description: "Healthy breakfast topping" },
@@ -51,6 +52,16 @@ export function ProductDetail({ product }: ProductDetailProps) {
   const { toast } = useToast();
 
   const handleAddToCart = () => {
+    if (PRELAUNCH_MODE) {
+      toast({
+        title: "Launching soon",
+        description:
+          "Soon you can order products from our website. Stay tuned and follow us on Instagram for updates.",
+        className: "bg-white/90",
+      });
+      return;
+    }
+
     addItem({
       id: product.id,
       name: product.name,
@@ -63,7 +74,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
     toast({
       title: "Added to cart",
       description: `${product.name} has been added to your cart.`,
-      className: "bg-white/90", // Light white background
+      className: "bg-white/90",
     });
   };
 
@@ -201,7 +212,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
 
           {/* Add to Cart */}
           <div className="flex space-x-4">
-            {quantity > 0 ? (
+            {!PRELAUNCH_MODE && quantity > 0 ? (
               <div className="flex items-center gap-4">
                 <Button
                   variant="outline"

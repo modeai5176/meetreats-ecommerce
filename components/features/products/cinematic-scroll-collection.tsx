@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/hooks/use-cart";
 import { ArrowRight, ShoppingCart, Instagram } from "lucide-react";
 import type { Product } from "@/lib/types";
+import { useToast } from "@/hooks/use-toast";
 import {
   Select,
   SelectContent,
@@ -44,7 +45,112 @@ export function CinematicScrollCollection() {
     ReturnType<typeof transformProduct>[]
   >([]);
   const { items, addItem, updateQuantity } = useCart();
+  const { toast } = useToast();
   const [activeFilter, setActiveFilter] = useState("activated-almonds");
+  const PRELAUNCH_MODE = true;
+
+  const handleAddToCart = (
+    product?: ReturnType<typeof transformProduct>
+  ) => {
+    if (PRELAUNCH_MODE || !product) {
+      toast({
+        title: "Launching soon",
+        description:
+          "Soon you can order products from our website. Stay tuned and follow us on Instagram for updates.",
+        className: "bg-white/90",
+      });
+      return;
+    }
+
+    const priceNumber = Number(String(product.price).replace(/[^\d]/g, ""));
+    addItem({
+      id: product.id,
+      name: product.name,
+      price: priceNumber,
+      weight: product.weight,
+      image: product.image,
+      slug: product.slug,
+    });
+  };
+
+  const renderProductAction = (
+    product: ReturnType<typeof transformProduct>,
+    mobile = false
+  ) => {
+    const cartItem = items.find((i) => i.id === product.id);
+    const quantity = cartItem?.quantity || 0;
+
+    if (PRELAUNCH_MODE) {
+      return (
+        <Button
+          size="lg"
+          className={
+            mobile
+              ? "montserrat w-full bg-dark-chocolate text-soft-cream hover:bg-dark-chocolate/90 hover:scale-105 transition-all duration-500 py-4 text-base font-light tracking-wider border-0 rounded-none"
+              : "bg-dark-chocolate text-soft-cream hover:bg-dark-chocolate/90 hover:scale-105 transition-all duration-500 px-8 py-4 text-lg font-light tracking-wider border-0 rounded-none montserrat"
+          }
+          onClick={() => handleAddToCart()}
+        >
+          <ShoppingCart className="mr-3 h-5 w-5" />
+          Add to Cart
+        </Button>
+      );
+    }
+
+    if (quantity > 0) {
+      return (
+        <div
+          className={
+            mobile
+              ? "flex items-center justify-center gap-4 w-full"
+              : "flex items-center gap-4"
+          }
+        >
+          <Button
+            size="lg"
+            variant="outline"
+            className={
+              mobile
+                ? "border border-dark-chocolate/30 text-dark-chocolate hover:bg-dark-chocolate hover:text-soft-cream rounded-none px-4"
+                : "border border-dark-chocolate/30 text-dark-chocolate hover:bg-dark-chocolate hover:text-soft-cream rounded-none px-5"
+            }
+            onClick={() => updateQuantity(product.id, quantity - 1)}
+          >
+            -
+          </Button>
+          <div className="montserrat text-lg min-w-[3ch] text-center">
+            {quantity}
+          </div>
+          <Button
+            size="lg"
+            className={
+              mobile
+                ? "bg-dark-chocolate text-soft-cream hover:bg-dark-chocolate/90 rounded-none px-4"
+                : "bg-dark-chocolate text-soft-cream hover:bg-dark-chocolate/90 rounded-none px-5"
+            }
+            onClick={() => updateQuantity(product.id, quantity + 1)}
+          >
+            +
+          </Button>
+        </div>
+      );
+    }
+
+    return (
+      <Button
+        size="lg"
+        className={
+          mobile
+            ? "montserrat w-full bg-dark-chocolate text-soft-cream hover:bg-dark-chocolate/90 hover:scale-105 transition-all duration-500 py-4 text-base font-light tracking-wider border-0 rounded-none"
+            : "bg-dark-chocolate text-soft-cream hover:bg-dark-chocolate/90 hover:scale-105 transition-all duration-500 px-8 py-4 text-lg font-light tracking-wider border-0 rounded-none montserrat"
+        }
+        onClick={() => handleAddToCart(product)}
+      >
+        <ShoppingCart className="mr-3 h-5 w-5" />
+        Add to Cart
+      </Button>
+    );
+  };
 
   const filters = [
     { label: "Activated Almonds", value: "activated-almonds" },
@@ -167,59 +273,7 @@ export function CinematicScrollCollection() {
                   </div>
 
                   {/* CTA / Quantity Controls - Mobile */}
-                  <div>
-                    {(() => {
-                      const cartItem = items.find((i) => i.id === product.id);
-                      const quantity = cartItem?.quantity || 0;
-                      const priceNumber = Number(
-                        String(product.price).replace(/[^\d]/g, "")
-                      );
-                      return quantity > 0 ? (
-                        <div className="flex items-center justify-center gap-4 w-full">
-                          <Button
-                            size="lg"
-                            variant="outline"
-                            className="border border-dark-chocolate/30 text-dark-chocolate hover:bg-dark-chocolate hover:text-soft-cream rounded-none px-4"
-                            onClick={() =>
-                              updateQuantity(product.id, quantity - 1)
-                            }
-                          >
-                            -
-                          </Button>
-                          <div className="montserrat text-lg min-w-[3ch] text-center">
-                            {quantity}
-                          </div>
-                          <Button
-                            size="lg"
-                            className="bg-dark-chocolate text-soft-cream hover:bg-dark-chocolate/90 rounded-none px-4"
-                            onClick={() =>
-                              updateQuantity(product.id, quantity + 1)
-                            }
-                          >
-                            +
-                          </Button>
-                        </div>
-                      ) : (
-                        <Button
-                          size="lg"
-                          className="montserrat w-full bg-dark-chocolate text-soft-cream hover:bg-dark-chocolate/90 hover:scale-105 transition-all duration-500 py-4 text-base font-light tracking-wider border-0 rounded-none"
-                          onClick={() =>
-                            addItem({
-                              id: product.id,
-                              name: product.name,
-                              price: priceNumber,
-                              weight: product.weight,
-                              image: product.image,
-                              slug: product.slug,
-                            })
-                          }
-                        >
-                          <ShoppingCart className="mr-3 h-5 w-5" />
-                          Add to Cart
-                        </Button>
-                      );
-                    })()}
-                  </div>
+                  <div>{renderProductAction(product, true)}</div>
                 </div>
               </div>
 
@@ -274,57 +328,7 @@ export function CinematicScrollCollection() {
 
                   {/* CTA / Quantity Controls + View Details */}
                   <div className="flex flex-col sm:flex-row gap-4">
-                    {(() => {
-                      const cartItem = items.find((i) => i.id === product.id);
-                      const quantity = cartItem?.quantity || 0;
-                      const priceNumber = Number(
-                        String(product.price).replace(/[^\d]/g, "")
-                      );
-                      return quantity > 0 ? (
-                        <div className="flex items-center gap-4">
-                          <Button
-                            size="lg"
-                            variant="outline"
-                            className="border border-dark-chocolate/30 text-dark-chocolate hover:bg-dark-chocolate hover:text-soft-cream rounded-none px-5"
-                            onClick={() =>
-                              updateQuantity(product.id, quantity - 1)
-                            }
-                          >
-                            -
-                          </Button>
-                          <div className="montserrat text-lg min-w-[3ch] text-center">
-                            {quantity}
-                          </div>
-                          <Button
-                            size="lg"
-                            className="bg-dark-chocolate text-soft-cream hover:bg-dark-chocolate/90 rounded-none px-5"
-                            onClick={() =>
-                              updateQuantity(product.id, quantity + 1)
-                            }
-                          >
-                            +
-                          </Button>
-                        </div>
-                      ) : (
-                        <Button
-                          size="lg"
-                          className="bg-dark-chocolate text-soft-cream hover:bg-dark-chocolate/90 hover:scale-105 transition-all duration-500 px-8 py-4 text-lg font-light tracking-wider border-0 rounded-none montserrat"
-                          onClick={() =>
-                            addItem({
-                              id: product.id,
-                              name: product.name,
-                              price: priceNumber,
-                              weight: product.weight,
-                              image: product.image,
-                              slug: product.slug,
-                            })
-                          }
-                        >
-                          <ShoppingCart className="mr-3 h-5 w-5" />
-                          Add to Cart
-                        </Button>
-                      );
-                    })()}
+                    {renderProductAction(product)}
 
                     <Button
                       size="lg"

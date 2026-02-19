@@ -1,4 +1,5 @@
-import { Hero } from "@/components/features/home/hero"
+// import { Hero } from "@/components/features/home/hero"
+import { Hero2 } from "@/components/features/home/hero2"
 import { ValuePropStrip } from "@/components/features/home/value-prop-strip"
 import { ProcessStrip } from "@/components/features/home/process-strip"
 import { FeaturedProducts } from "@/components/features/home/featured-products"
@@ -9,7 +10,8 @@ import { InstagramSection } from "@/components/features/home/instagram-section"
 export default function HomePage() {
   return (
     <div className="flex flex-col">
-      <Hero />
+      {/* <Hero /> */}
+      <Hero2 />
       <ValuePropStrip />
       <ProcessStrip />
       <FeaturedProducts />

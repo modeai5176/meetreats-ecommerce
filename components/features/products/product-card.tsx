@@ -8,7 +8,10 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { ShoppingCart, Check } from "lucide-react";
 import type { Product } from "@/lib/types";
 import { useCart } from "@/lib/hooks/use-cart";
-import { useState, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
+
+const PRELAUNCH_MODE = true;
 
 interface ProductCardProps {
   product: Product;
@@ -20,20 +23,29 @@ export function ProductCard({
   showPricePer100g = false,
 }: ProductCardProps) {
   const { addItem, updateQuantity, items } = useCart();
+  const { toast } = useToast();
   const [isAdding, setIsAdding] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
 
-  // Get cart item for this product
   const cartItem = items.find((item) => item.id === product.id);
   const quantity = cartItem?.quantity || 0;
-  const showQuantityControl = quantity > 0;
+  const showQuantityControl = !PRELAUNCH_MODE && quantity > 0;
 
   const handleAddToCart = async () => {
+    if (PRELAUNCH_MODE) {
+      toast({
+        title: "Launching soon",
+        description:
+          "Soon you can order products from our website. Stay tuned and follow us on Instagram for updates.",
+        className: "bg-white/90",
+      });
+      return;
+    }
+
     if (isAdding) return;
 
     setIsAdding(true);
 
-    // Add to cart
     addItem({
       id: product.id,
       name: product.name,
@@ -43,10 +55,8 @@ export function ProductCard({
       slug: product.slug,
     });
 
-    // Show success feedback
     setIsAdded(true);
 
-    // Reset animation state
     setTimeout(() => {
       setIsAdding(false);
       setIsAdded(false);
@@ -111,13 +121,10 @@ export function ProductCard({
             </div>
           )}
 
-          {/* Quantity Indicator - shows when item is in cart */}
           {showQuantityControl && (
             <div className="absolute top-3 right-3">
               <div className="relative">
-                {/* Golden glow effect */}
                 <div className="absolute inset-0 rounded-full bg-gradient-to-r from-[#CBB27A] via-[#D4AF37] to-[#CBB27A] opacity-80 blur-sm"></div>
-                {/* Main badge */}
                 <div
                   className="relative text-white text-xs font-bold px-3 py-2 rounded-full shadow-xl border-2 border-[#CBB27A] backdrop-blur-sm"
                   style={{ backgroundColor: "#2a1914" }}
@@ -127,6 +134,7 @@ export function ProductCard({
               </div>
             </div>
           )}
+
         </div>
 
         {/* Content Area - Fixed height container */}
@@ -185,7 +193,7 @@ export function ProductCard({
               </div>
             </CardContent>
 
-            {/* Dynamic Add to Cart Button / Quantity Control */}
+            {/* Dynamic Add to Cart Button / Quantity Control (kept for post-launch) */}
             <CardFooter className="p-4 pt-0">
               {!showQuantityControl ? (
                 <Button
